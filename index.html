@@ -290,7 +290,7 @@
     // ---------- Listener real-time por perfil ----------
     function attachListenerForPerfil(){
       if(unsubscribeListener) unsubscribeListener();
-      unsubscribeListener = db.collection('estudiantes').where('perfil','==',perfil)
+      unsubscribeListener = db.collection('estudiantes')
         .onSnapshot(snap => {
           estudiantesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           // actualizar vistas activas
@@ -574,4 +574,5 @@
   </script>
 </body>
 </html>
+
 
