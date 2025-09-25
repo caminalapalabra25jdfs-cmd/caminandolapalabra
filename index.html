@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
+  <link rel="shorcut icon" href="icon.png" type="image/x-icon">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Caminando la Palabra</title>
 
@@ -25,8 +26,8 @@
 
     /* Nav */
     nav{background:#222;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px;position:sticky;top:0;z-index:10}
-    nav .titulo{font-weight:700}
-    nav .perfil-link{color:#ffc107;cursor:pointer;text-decoration:underline}
+    nav .titulo{font-weight:1700;font-size:26px}
+    nav .perfil-link{color:#fffdf7;cursor:pointer;text-decoration:underline}
     nav .menu button{margin-left:10px;border-radius:20px;padding:8px 12px;border:none;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer}
 
     /* Layout */
@@ -41,7 +42,7 @@
     th,td{padding:10px;border:1px solid #e6e6e6;text-align:center}
     th{background:var(--primary);color:#fff}
 
-    footer{text-align:center;padding:10px;background:#111;color:#fff;margin-top:auto}
+    footer{text-align:center;padding:12px;background:#111;color:#fff;margin-top:auto;font-size:10px}
 
     /* Push-up modal (desde abajo) */
     .modal{position:fixed;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:none;align-items:flex-end;justify-content:center;padding:12px}
@@ -74,15 +75,16 @@
 
   <!-- App -->
   <div id="app" style="display:none">
-    <nav>
-      <div class="titulo" id="app-title">CAMINANDO LA PALABRA</div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="titulo" id="app-title">
+      <img src="icon.png" width="26" height="26">  CAMINANDO LA PALABRA</div>
       <div style="display:flex;align-items:center">
         <div style="margin-right:12px">(<span class="perfil-link" id="perfil-link" onclick="volverSeleccion()"></span>)</div>
         <div class="menu">
-          <button class="primary-btn" onclick="showSection('registro')">Registro</button>
-          <button class="primary-btn" onclick="showSection('estudiantes')">Estudiantes</button>
-          <button class="primary-btn" onclick="showSection('asistencia')">Asistencia</button>
-          <button class="primary-btn" onclick="showSection('resumen')">Resumen</button>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="showSection('registro')">Registro</button>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="showSection('estudiantes')">Estudiantes</button>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="showSection('asistencia')">Asistencia</button>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="showSection('resumen')">Resumen</button>
         </div>
       </div>
     </nav>
@@ -228,7 +230,11 @@
       </div>
     </div>
 
-    <footer>© Jesús Forero 2025</footer>
+    <footer>
+      <p>Colegio Rafael Pombo Neiva</p>
+      <p><a href="https://www.colegiorafaelpomboneiva.com/caminando-la-palabra" target="_blank" style="text-decoration: underline; color: inherit;">Proyecto Caminando la Palabra</a></p>
+      <p>© Jesús Forero 2025</p>
+    </footer>
   </div>
 
   <!-- ---------- Firebase + App logic ---------- -->
@@ -530,14 +536,35 @@
     }
 
     // ---------- Helpers ----------
-    function calcularTiempo(fecha){
-      if(!fecha) return '';
-      const inicio = new Date(fecha);
-      const hoy = new Date();
-      const diff = hoy - inicio;
-      const dias = Math.floor(diff / (1000*60*60*24));
-      return `${dias} días`;
-    }
+    function calcularTiempo(fecha) {
+  let inicio = new Date(fecha);
+  let hoy = new Date();
+
+  let anios = hoy.getFullYear() - inicio.getFullYear();
+  let meses = hoy.getMonth() - inicio.getMonth();
+  let dias = hoy.getDate() - inicio.getDate();
+
+  // Ajustar días negativos
+  if (dias < 0) {
+    meses--;
+    let ultimoDiaMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+    dias += ultimoDiaMesAnterior;
+  }
+
+  // Ajustar meses negativos
+  if (meses < 0) {
+    anios--;
+    meses += 12;
+  }
+
+  let partes = [];
+  if (anios > 0) partes.push(`${anios} año${anios > 1 ? 's' : ''}`);
+  if (meses > 0) partes.push(`${meses} mes${meses > 1 ? 'es' : ''}`);
+  if (dias > 0) partes.push(`${dias} día${dias > 1 ? 's' : ''}`);
+
+  return partes.length > 0 ? partes.join(", ") : "Hoy";
+}
+
 
     // ---------- Inicial ----------
     window.addEventListener('load', () => {
@@ -547,7 +574,4 @@
   </script>
 </body>
 </html>
-
-
-
 
