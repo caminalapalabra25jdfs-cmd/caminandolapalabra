@@ -530,13 +530,24 @@
     }
 
     // ---------- Helpers ----------
-    function calcularTiempo(fecha){
-      if(!fecha) return '';
-      const inicio = new Date(fecha);
-      const hoy = new Date();
-      const diff = hoy - inicio;
-      const dias = Math.floor(diff / (1000*60*60*24));
-      return `${dias} días`;
+    function calcularTiempo(fecha) {
+      const ahora = new Date();
+      let años = ahora.getFullYear() - fecha.getFullYear();
+      let meses = ahora.getMonth() - fecha.getMonth();
+      let dias = ahora.getDate() - fecha.getDate();
+
+      if (dias < 0) {
+        meses -= 1;
+        const ultimoDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 0).getDate();
+        dias += ultimoDiaMes;
+      }
+
+      if (meses < 0) {
+        años -= 1;
+        meses += 12;
+      }
+
+      return `${años} años, ${meses} meses, ${dias} días`;
     }
 
     // ---------- Inicial ----------
@@ -547,4 +558,5 @@
   </script>
 </body>
 </html>
+
 
