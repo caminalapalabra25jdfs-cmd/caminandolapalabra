@@ -440,46 +440,62 @@
       if(!tbody) return;
       tbody.innerHTML = '';
       const date = document.getElementById('fechaAsistencia').value;
-      estudiantesCache.filter(e => {
-        if(!q) return true;
-        return (e.nombres||'').toLowerCase().includes(q) || (e.apellidos||'').toLowerCase().includes(q);
-      }).forEach(e => {
-        const checked = (date && e.asistencias && e.asistencias[date]) ? 'checked' : '';
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr data-id="${e.id}">
-            <td>${escapeHtml(e.apellidos)}</td>
-            <td>${escapeHtml(e.nombres)}</td>
-            <td>${e.edad || ''}</td>
-            <td><input type="checkbox" id="asis-${e.id}" ${checked} /></td>
-          </tr>
+
+     estudiantesCache
+       .filter(e => !q || (e.nombres||'').toLowerCase().includes(q) || (e.apellidos||'').toLowerCase().includes(q))
+       .forEach(e => {
+          const checked = (date && e.asistencias && e.asistencias[date]) ? 'checked' : '';
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr data-id="${e.id}">
+              <td>${escapeHtml(e.apellidos)}</td>
+              <td>${escapeHtml(e.nombres)}</td>
+              <td>${e.edad || ''}</td>
+              <td><input type="checkbox" id="asis-${e.id}" ${checked} /></td>
+            </tr>
         `);
-      });
-    }
+       });
+   }
 
-    async function guardarAsistencia(){
-      const date = document.getElementById('fechaAsistencia').value;
-      if(!date){ alert("⚠️ Selecciona una fecha antes de guardar"); return; }
 
-      // recorre todos los estudiantes visibles (preferimos la cache)
-      const docs = estudiantesCache.slice(); // array
-      try{
-        // actualizar cada documento individualmente (podría optimizarse con batch)
-        for(const e of docs){
-          const checkbox = document.getElementById('asis-' + e.id);
-          if(!checkbox) continue;
-          const asistio = !!checkbox.checked;
-          // solo actualizamos si hay cambio o si no existe la propiedad
-          // guardamos la propiedad asistencias.<date>
-          const updateObj = {};
-          updateObj[`asistencias.${date}`] = asistio;
-          await db.collection('estudiantes').doc(e.id).update(updateObj);
-        }
-        alert("✅ Asistencia guardada");
-      }catch(err){
-        console.error("Error guardando asistencia:", err);
-        alert("Error guardando asistencia. Revisa consola.");
-      }
-    }
+async function guardarAsistencia(){
+  const date = document.getElementById('fechaAsistencia').value;
+  if(!date){ 
+    alert("⚠️ Selecciona una fecha antes de guardar"); 
+    return; 
+  }
+
+  const checkboxes = document.querySelectorAll('#tablaAsistencia input[type=checkbox]');
+  if(checkboxes.length === 0){ 
+    alert("No hay estudiantes visibles para guardar"); 
+    return; 
+  }
+
+  try{
+    const batch = db.batch();
+
+    checkboxes.forEach(chk => {
+      const id = chk.id.replace('asis-', '');
+      const docRef = db.collection('estudiantes').doc(id);
+      batch.update(docRef, { [`asistencias.${date}`]: chk.checked });
+    });
+
+    await batch.commit();
+
+    // Actualizar cache local para reflejar cambios inmediatamente
+    estudiantesCache.forEach(e => {
+      if(e.asistencias === undefined) e.asistencias = {};
+      const checkbox = document.getElementById('asis-' + e.id);
+      if(checkbox) e.asistencias[date] = checkbox.checked;
+    });
+
+    alert("✅ Asistencia guardada correctamente");
+    renderResumen(); // actualizar resumen automáticamente
+  }catch(err){
+    console.error("Error guardando asistencia:", err);
+    alert("Error guardando asistencia. Revisa consola.");
+  }
+}
+
 
     function clearAttendanceDate(){
       document.getElementById('fechaAsistencia').value = '';
